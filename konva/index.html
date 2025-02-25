@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Libreria Konva</title>
+    <script src="https://unpkg.com/konva@9/konva.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div id="container"></div>
+
+    <script>
+        const stage = new Konva.Stage({
+            container: 'container',
+            width: 1000,
+            height: 600,
+        });
+
+        const layer = new Konva.Layer();
+        stage.add(layer);
+
+        const fondo = new Konva.Rect({
+            x: 0,
+            y: 0,
+            width: 1000,
+            height: 700,
+            fill: 'gray',
+            stroke: 'black',
+            strokeWidth: 2,
+        });
+
+        const rect = new Konva.Rect({
+            x: 50,
+            y: 50,
+            width: 200,
+            height: 100,
+            fill: 'lightgray',
+            stroke: 'black',
+            strokeWidth: 3,
+            cornerRadius: 10,
+            draggable: true,
+            // shadowColor: 'black',
+            // shadowBlur: 10,
+            // shadowOffset: { x: 5, y: 5 },
+            // shadowOpacity: 0.6
+        });
+
+        const circle = new Konva.Circle({
+            x: rect.x() + 50,
+            y: rect.y() + 50,
+            width: 50,
+            height: 50,
+            fill: 'lightblue',
+            stroke: 'black',
+            strokeWidth: 2,
+            draggable: true
+        });
+
+        const rectWithText = new Konva.Rect({
+            x: fondo.width() - 250,
+            y: 50,
+            width: 150,
+            height: 300,
+            fill: 'lightgray',
+            stroke: 'black',
+            strokeWidth: 3,
+            cornerRadius: 10,
+            draggable: true,
+        });
+
+        const textParar = new Konva.Text({
+            x: rectWithText.x() + 10,
+            y: rectWithText.y() + 10,
+            text: 'Parar',
+            fontSize: 20,
+            fontFamily: 'Calibri',
+            fill: 'white'
+        });
+
+        const textReanudar = new Konva.Text({
+            x: rectWithText.x() + 10,
+            y: rectWithText.y() + 40,
+            text: 'Reanudar',
+            fontSize: 20,
+            fontFamily: 'Calibri',
+            fill: 'white'
+        });
+
+        rectWithText.on('dragmove', function () {
+            textParar.position({
+            x: rectWithText.x() + 10,
+            y: rectWithText.y() + 10
+            });
+            textReanudar.position({
+            x: rectWithText.x() + 10,
+            y: rectWithText.y() + 40
+            });
+        });
+
+        rect.on('dragmove', function () {
+            circle.position({
+            x: rect.x() + 50,
+            y: rect.y() + 50
+            });
+        });
+
+
+        circle.on('mouseover', function () {
+            document.body.style.cursor = 'pointer';
+        });
+
+        circle.on('mouseout', function () {
+            document.body.style.cursor = 'default';
+        });
+
+        circle.on('dragend', function () {
+            if (!rect.intersects(circle.getClientRect())) {
+                const newCircle = new Konva.Circle({
+                    x: circle.x(),
+                    y: circle.y(),
+                    width: 50,
+                    height: 50,
+                    fill: 'lightblue',
+                    stroke: 'black',
+                    strokeWidth: 2,
+                    draggable: true
+                });
+                layer.add(newCircle);
+                circle.position({
+                    x: rect.x() + 50,
+                    y: rect.y() + 50
+                });
+                layer.draw();
+
+                let velocityX = 2;
+                let velocityY = 2;
+
+                // Aplicar la animación al nuevo círculo
+                const anim = new Konva.Animation(function (frame) {
+                    newCircle.x(newCircle.x() + velocityX);
+                    newCircle.y(newCircle.y() + velocityY);
+
+                    // Rebotar en los bordes del stage
+                    if (newCircle.x() <= 0 || newCircle.x() >= stage.width()) {
+                        velocityX = -velocityX;
+                    }
+                    if (newCircle.y() <= 0 || newCircle.y() >= stage.height()) {
+                        velocityY = -velocityY;
+                    }
+                }, layer);
+
+                newCircle.on('dragend', function () {
+                    anim.start();
+                });
+
+                anim.start();
+            }
+        });
+
+        layer.add(fondo);
+        layer.add(rect);
+        layer.add(circle);
+
+        layer.add(rectWithText);
+        layer.add(textParar);
+        layer.add(textReanudar);
+
+
+        layer.draw();
+    </script>
+</body>
+</html>
